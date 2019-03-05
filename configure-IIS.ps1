@@ -1,20 +1,27 @@
-if(Get-Website -Name "Default Web Site")
-{
-    Remove-WebSite -Name "Default Web Site"
-}
+<#
+    .SYNOPSIS
+        Downloads and configures .Net Core Music Store application sample across IIS and Azure SQL DB.
+#>
+# Firewall
+netsh advfirewall firewall add rule name="http" dir=in action=allow protocol=TCP localport=80
 
-if(Get-Website -Name "verimoto-admin")
-{
-	Remove-WebSite -Name "verimoto-admin"
-}
+# Folders
+New-Item -ItemType Directory c:\temp
+New-Item -ItemType Directory C:\verimoto
 
-if(Test-Path "IIS:\AppPools\verimoto-admin")
-{
-  Remove-WebAppPool "verimoto-admin"
-}
+# Install iis
+Install-WindowsFeature web-server -IncludeManagementTools
 
-New-WebAppPool verimoto-admin -Force
-Start-WebAppPool -Name verimoto-admin
+# Install dot.net core sdk
+Invoke-WebRequest http://go.microsoft.com/fwlink/?LinkID=615460 -outfile c:\temp\vc_redistx64.exe
+Start-Process c:\temp\vc_redistx64.exe -ArgumentList '/quiet' -Wait
+Invoke-WebRequest https://go.microsoft.com/fwlink/?LinkID=809122 -outfile c:\temp\DotNetCore.1.0.0-SDK.Preview2-x64.exe
+Start-Process c:\temp\DotNetCore.1.0.0-SDK.Preview2-x64.exe -ArgumentList '/quiet' -Wait
+Invoke-WebRequest https://go.microsoft.com/fwlink/?LinkId=817246 -outfile c:\temp\DotNetCore.WindowsHosting.exe
+Start-Process c:\temp\DotNetCore.WindowsHosting.exe -ArgumentList '/quiet' -Wait
 
-New-WebSite -Name verimoto-admin -Port 80 -PhysicalPath "$workDir\Verimoto.Admin\obj\Staging\Package\PackageTmp" -ApplicationPool verimoto-admin  -Force
-Start-WebSite -Name "verimoto-admin"
+# Configure iis
+Remove-WebSite -Name "Default Web Site"
+Set-ItemProperty IIS:\AppPools\DefaultAppPool\ managedRuntimeVersion ""
+New-Website -Name "verimoto" -Port 80 -PhysicalPath C:\verimoto\ -ApplicationPool DefaultAppPool
+& iisreset
