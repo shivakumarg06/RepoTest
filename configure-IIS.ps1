@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Downloads and configures .Net Core Music Store application sample across IIS and Azure SQL DB.
+      
 #>
 # Firewall
 netsh advfirewall firewall add rule name="http" dir=in action=allow protocol=TCP localport=80
