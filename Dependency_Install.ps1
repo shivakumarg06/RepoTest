@@ -64,33 +64,22 @@ cmd.exe /c $Command
 $Command = "IISRESET"
 Invoke-Expression -Command $Command
 
-
-#installUrlRewrite
-
-#SetupWeb.ps1
-#$sourceDir = "C:\Users\Azureadmin\Desktop"
-#$workDir = "$sourceDir\Verimoto_Staging\Verimoto_Staging\Verimoto.Admin\Content\d_C\a\1\s\Verimoto\Verimoto.Admin\obj\Staging\Package\PackageTmp\*"
-#New-item -Path C:\verimoto -ItemType Directory -Force
-#Copy-Item $workDir C:\verimoto\ -recurse -Force
-
-# Azure DevOps Pipelines Variables 
-# $sourceDir = "$(System.DefaultWorkingDirectory)"
-# $ArchivedFolders = "$sourceDir\$(Build.DefinitionName)\Verimoto_Staging"
-
+# Latest Artifacts Download and Update to IIS Sites, 
 
 # Local Machine Variables
-$sourceDir = "C:\Users\Azureadmin\Desktop" #(Local Machine Variable)
-$ArchivedFolders = "$sourceDir\Verimoto_Staging\Verimoto_Staging"
-$workDir = "C:\verimoto"
-
-New-item -Path C:\verimoto -ItemType Directory -Force
-#Expand-Archive -Path $ArchivedFolders\Verimoto.Admin -DestinationPath $ArchivedFolders\Verimoto.Admin
-#Expand-Archive -Path $ArchivedFolders\
-Get-ChildItem $ArchivedFolders -Filter *.zip | Expand-Archive -DestinationPath  "$workDir\Zip" -Force
-#Copy-Item $workDir C:\verimoto\ -recurse -Force
-Copy-Item "$workDir\Zip\Content\d_C\a\1\s\Verimoto\*" -Destination "$workDir" -Recurse -Force
+# $sourceDir = "C:\VSTSAgent\vsts-agent-win-x64-2.147.1\_work\3\a\Artifact"
+# $ArchivedFolders = "C:\VSTSAgent\vsts-agent-win-x64-2.147.1\_work\3\a\Artifact"
 
 
+# Azure DevOps Pipelines Variables 
+$sourceDir = "$(System.DefaultWorkingDirectory)\$(Build.DefinitionName)\"
+$ArchivedFolders = "$sourceDir\Verimoto_Staging\"
+$workDir = "C:\Verimoto"
+
+# Extract Archived Verimoto Websites 
+Get-ChildItem $ArchivedFolders -Filter *.zip | Expand-Archive -DestinationPath "$workDir\" -Force
+
+# Verimoto Website Setup
 Set-ExecutionPolicy Unrestricted
 
 if(Get-Website -Name "Default Web Site")
@@ -111,5 +100,6 @@ if(Test-Path "IIS:\AppPools\verimoto-admin")
 New-WebAppPool verimoto-admin -Force
 Start-WebAppPool -Name verimoto-admin
 
-New-WebSite -Name verimoto-admin -Port 80 -PhysicalPath "$workDir\Verimoto.Admin\obj\Staging\Package\PackageTmp" -ApplicationPool verimoto-admin  -Force
+New-WebSite -Name verimoto-admin -Port 80 -PhysicalPath "$workDir\_PublishedWebsites\Verimoto.Admin" -ApplicationPool verimoto-admin  -Force
 Start-WebSite -Name "verimoto-admin"
+
