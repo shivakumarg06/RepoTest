@@ -3,7 +3,7 @@
 $sourceDir = "$(System.DefaultWorkingDirectory)\$(Build.DefinitionName)\"
 # $sourceDir = "$(System.DefaultWorkingDirectory)**/drop"
 
-$ArchivedFolders = "$sourceDir\Verimoto_Staging"
+$ArchivedFolders = "$sourceDir\Verimoto_Staging\"
 $workDir = "C:\verimoto"
 
 
